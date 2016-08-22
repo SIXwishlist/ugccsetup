@@ -14,7 +14,7 @@ $this->Form->create()
             <li>
                 <?php
                     $this->Form->label("Enable", "enabled");
-                    $this->Form->fieldText("enabled", $this->Html->ifSet($vars->enabled), array("id" => "pending_minutes"));
+                    $this->Form->fieldText("enabled", $this->Html->ifSet($vars->enabled), array("id" => "enabled"));
                 ?>
             </li>
             <li>

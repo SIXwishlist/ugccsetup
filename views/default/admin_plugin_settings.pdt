@@ -1,0 +1,30 @@
+<?php
+$this->Widget->clear();
+$this->Widget->create('UGCC Setup');
+$this->Form->create()
+?>
+
+<div class="inner">
+    <div class="title_row first">
+        <h3>Settings</h3>
+    </div>
+    
+    <div class="pad">
+        <ul>
+            <li>
+                <?php
+                    $this->Form->label("Enable", "enabled");
+                    $this->Form->fieldText("enabled", $this->Html->ifSet($vars->enabled), array("id" => "pending_minutes"));
+                ?>
+            </li>
+            <li>
+                <?php
+                    $this->Form->label("ID of user who is owner of empty servers", "free_server_owner_id");
+                    $this->Form->fieldText("free_server_owner_id", $this->Html->ifSet($vars->free_server_owner_id), array("id" => "free_server_owner_id"));
+                ?>
+              </li>
+            
+        </ul>
+    </div>
+    <div class="button_row"><a class="btn_right submit" href="#">Submit</a></div>
+</div>

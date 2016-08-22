@@ -1,0 +1,11 @@
+{
+    "version": "0.0.1",
+    "name": "UGCC Setup",
+    "description": "Provision UGCC servers automatically",
+    "authors": [
+        {
+            "name": "deetr",
+            "url": "http://www.accelerateservers.com"
+        }
+    ]
+}

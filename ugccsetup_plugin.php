@@ -5,8 +5,8 @@ class UgccsetupPlugin extends Plugin {
     }
     
     public function install($plugin_id) {
-        Loader::loadModels($this, array("UGCCSetup.UGCCSetupSettings"));
-        $this->UGCCSetupSettings->setSettings(null, array("enabled" => false, "free_server_owner_id" => -1));
+        Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings"));
+        $this->UgccsetupSettings->setSettings(null, array("enabled" => false, "free_server_owner_id" => -1));
     }
 
 	public function getEvents() {

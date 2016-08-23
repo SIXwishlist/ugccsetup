@@ -1,6 +1,6 @@
 <?php
 
-class UGCCSetupModel extends AppModel {
+class UgccsetupModel extends AppModel {
 
 }
 ?>

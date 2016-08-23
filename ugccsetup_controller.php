@@ -1,5 +1,5 @@
 <?php
-class UGCCSetupController extends AppController {
+class UgccsetupController extends AppController {
     public function preAction() {
             parent::preaction();
 

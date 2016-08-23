@@ -1,5 +1,5 @@
 <?php
-class UGCCSetupPlugin extends Plugin {
+class UgccsetupPlugin extends Plugin {
     public function __construct() {
         $this->loadConfig(dirname(__FILE__) . DS . "config.json");
     }

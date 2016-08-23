@@ -1,6 +1,6 @@
 <?php
 
-class UGCCSetupSettings extends AppModel {
+class UgccsetupSettings extends AppModel {
         public function __construct() {
                 parent::__construct();
 
@@ -45,8 +45,8 @@ class UGCCSetupSettings extends AppModel {
 
         public function supportedSettings() {
             return array(
-                    'enabled' => 'UGCCSetup.enabled',
-                    'free_server_owner_uid' => 'UGCCSetup.free_server_owner_uid'
+                    'enabled' => 'Ugccsetup.enabled',
+                    'free_server_owner_uid' => 'Ugccsetup.free_server_owner_uid'
             );
         }
 }

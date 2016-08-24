@@ -1,0 +1,27 @@
+[
+    {
+        "id" : 2,
+        "game" : "tf2",
+        "game_slots" : 14,
+         "mumble_slots" : 50
+    },
+    {
+        "id" : 3,
+        "game" : "tf2",
+        "game_slots" : 20,
+        "mumble_slots" : 50
+    },
+    {
+        "id" : 4,
+        "game" : "tf2",
+        "game_slots" : 24,
+        "mumble_slots" : 75
+    },
+
+    {
+        "id" : 5,
+        "game" : "tf2",
+        "game_slots" : 32,
+        "mumble_slots" : 100
+    }
+]

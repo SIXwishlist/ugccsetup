@@ -6,7 +6,7 @@ class UgccsetupPlugin extends Plugin {
     
     public function install($plugin_id) {
         Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings"));
-        $this->UgccsetupSettings->setSettings(null, array("enabled" => false, "free_server_owner_id" => -1));
+        $this->UgccsetupSettings->setSettings(null, array("enabled" => false, "free_server_owner_id" => -1, "ugcc_user" => -1, "ugcc_token" => "", "api_url" => ""));
     }
 
 	public function getEvents() {
@@ -23,7 +23,7 @@ class UgccsetupPlugin extends Plugin {
                 Loader::loadModels($this, array("Clients");
 
                 $params = $events->getParams();
-		$invoice_id = $params["invoice_id"];
+		        $invoice_id = $params["invoice_id"];
                 $invoice = $this->Invoices->get($invoice_id);
                 if ($invoice["paid"] == 0)
                         return
@@ -37,15 +37,71 @@ class UgccsetupPlugin extends Plugin {
                 if ($username == "") {
                         return warn(true, "Invalid username")
                 }
+                $server = makeServer($invoice['service_id'], $username);
                 
 	}
 
 	public function makeServer($service_id, $username) {
-        $services = JSON.parse('setup.json');
+            $services = JSON.parse('setup.json')['services'];
+           
+            $server = getServerByUID($this->UgccsetupSettings->getSetting("free_server_owner_id");
+            if ($server == NULL){
+                warn(true, "No servers left to setup");
+            }
+            $uid = getUID($username);
+            if ($uid == NULL) {
+                    $info = explode(",", sendCommand("newuser", NULL, $username));
+                    $uid = $info[0];
+            }
+    }
+    
+    // Never returns if $fatal is true
+    public function warn($fatal, $warning_msg) {
+        //TODO email warning message    
+        if ($fatal) {
+            exit();
+        }
     }
 
-    public function warn($fatal, $warning_msg) {
+    public function sendCommand($command, $server_id=NULL, o1=NULL, o2=NULL){
+        $params = array(
+                "u" => $this->UgccsetupSettings->getSetting("ugcc_user"),
+                "p" => $this->UgccsetupSettings->getSetting("ugcc_token"),
+                "i" => $server_id,
+                "c" => $command,
+                "o1" => $o1,
+                "o2" => $o2,
+        )
+        $ugcc = curl_init($this->UgccsetupSettings->getSetting("api_url");
+        curl_setopt($ugcc, CURLOPT_POST, 1);
+        curl_setopt($ugcc, CURLOPT_POSTFIELDS, http_build_query($params));
+        curl_setopt($ugcc, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ugcc);
+        curl_close($ugcc);
+        if (substr($response, 0, 2) != "OK") {
+            return warn(true, "Error connecting to UGCC:\n" . $response);
+        }
+        else {
+            return substr($response, 5);
+        }
+    }
 
+    public function getServerByUID($uid) {
+        //TODO cache server list
+        $servers = explode(",", str_replace("\n", ",", sendCommand("listservers")));
+        $server_key = array_search($uid, $list);
+        if ($server_key == false)
+                return NULL;
+        return $servers[$server_key - 1];
+    }
+
+    public function getUID($username) {
+        //TODO cache user list
+        $users = explode(",", str_replace("\n", ",", sendCommand('listusers')));
+        $user_key = array_search($uid, $list);
+        if ($user_key == false)
+                return NULL;
+        return $users[$user_key - 1];
     }
 }
 ?>

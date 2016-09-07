@@ -46,7 +46,10 @@ class UgccsetupSettings extends AppModel {
         public function supportedSettings() {
             return array(
                     'enabled' => 'Ugccsetup.enabled',
-                    'free_server_owner_uid' => 'Ugccsetup.free_server_owner_uid'
+                    'free_server_id' => 'Ugccsetup.free_server_id',
+                    "ugcc_user" => "Ugccsetup.ugcc_user",
+                    "ugcc_token" => "Ugccsetup.ugcc_token",
+                    "api_url" => "Ugccsetup.api_token",
             );
         }
 }

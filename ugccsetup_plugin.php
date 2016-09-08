@@ -40,10 +40,8 @@ class UgccsetupPlugin extends Plugin {
                 $server = makeServer($invoice['service_id'], $username);
                 
 	}
-
-	public function makeServer($service_id, $username) {
-            $services = JSON.parse('setup.json')['services'];
-           
+    //$extras is an array of extra ids to install
+	public function makeServer($service_id, $username, $extras=NULL) {
             $server = getServerByUID($this->UgccsetupSettings->getSetting("free_server_owner_id");
             if ($server == NULL){
                 warn(true, "No servers left to setup");
@@ -53,14 +51,45 @@ class UgccsetupPlugin extends Plugin {
                     $info = explode(",", sendCommand("newuser", NULL, $username));
                     $uid = $info[0];
             }
+            $services_str = file_get_contents("setup.json");
+            if ($services_str == false){
+                warn(true, "No services specified in setup.json");
+            }
+            $services = json_decode($string, true)['services'];
+            $service = NULL;
+            foreach($services as $s){
+                    if ($s['id'] == $service_id){
+                        $service = $s
+                    }
+            }
+            if ($service == NULL){
+                warn(true, "Invalid service ID " . $service_id . ". Make sure setup.json is correctly formatted and up to date");
+            }
+
+            // Do actual ugcc server setup
+            // This should be the last thing we do
+            sendCommand("updatedbserver", $server, "user", $uid);
+            //TODO initialize $maxplayers
+            //TODO set server game
+            sendCommand("updatedbserver", $server, "var1", $maxplayers);
+            //TODO setup mumble server
+            sendCommand("updatedbserver", $server, "var5", $mumbleport);
+            foreach ($extras as $extra) {
+                sendCommand("extra", $server, $extra);
+            }
+
     }
     
     // Never returns if $fatal is true
     public function warn($fatal, $warning_msg) {
-        //TODO email warning message    
         if ($fatal) {
+            warn(false, $warning_msg);
             exit();
+        } 
+        else {
+            //TODO send email warning
         }
+
     }
 
     public function sendCommand($command, $server_id=NULL, o1=NULL, o2=NULL){

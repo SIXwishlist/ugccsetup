@@ -15,34 +15,36 @@ class UgccsetupPlugin extends Plugin {
 				"event" => "Invoices.setClosed",
 				"callback" => array("this", "handleCInvoice")
 			)
-		);
+    );
 	}
 
 	private function handleCInvoice($event) {
-                Loader::loadModels($this, array("Invoices");
-                Loader::loadModels($this, array("Clients");
+                Loader::loadModels($this, array("Invoices"));
+                Loader::loadModels($this, array("Clients"));
 
                 $params = $events->getParams();
 		        $invoice_id = $params["invoice_id"];
                 $invoice = $this->Invoices->get($invoice_id);
                 if ($invoice["paid"] == 0)
-                        return
+                        warn(true, "Invoice not paid");
                 if ($invoice["total"] < $invoice["paid"]) {
                         warn(false, "Invoice not fully paid. Client paid " . $invoice['paid'] . "but total was " . $invoice['total']);
                 }
 
-                $username = $this->Clients->get($invoice["client_id"];
+                $username = $this->Clients->get($invoice["client_id"]);
                 if ($username == "")
                         $username = preg_replace("/[^A-Za-z0-9]/", "", $invoice["email"]);
                 if ($username == "") {
-                        return warn(true, "Invalid username")
+                        return warn(true, "Invalid username");
                 }
-                $server = makeServer($invoice['service_id'], $username);
+                // TODO parse extras from invoice
+                $extras = NULL;
+                $server = makeServer($invoice['service_id'], $username, $invoice["email"], $extras);
                 
 	}
     //$extras is an array of extra ids to install
-	public function makeServer($service_id, $username, $extras=NULL) {
-            $server = getServerByUID($this->UgccsetupSettings->getSetting("free_server_owner_id");
+	public function makeServer($service_id, $username, $email, $extras=NULL) {
+            $server = getServerByUID($this->UgccsetupSettings->getSetting("free_server_owner_id"));
             if ($server == NULL){
                 warn(true, "No servers left to setup");
             }
@@ -59,20 +61,20 @@ class UgccsetupPlugin extends Plugin {
             $service = NULL;
             foreach($services as $s){
                     if ($s['id'] == $service_id){
-                        $service = $s
+                        $service = $s;
                     }
             }
             if ($service == NULL){
                 warn(true, "Invalid service ID " . $service_id . ". Make sure setup.json is correctly formatted and up to date");
             }
-
+            
+            
             // Do actual ugcc server setup
             // This should be the last thing we do
             sendCommand("updatedbserver", $server, "user", $uid);
-            //TODO initialize $maxplayers
-            //TODO set server game
-            sendCommand("updatedbserver", $server, "var1", $maxplayers);
-            //TODO setup mumble server
+            //TODO set server game to service['game']
+            sendCommand("updatedbserver", $server, "var1", $service['game_slots']);
+            //TODO setup mumble server with service['mumble_slots']
             sendCommand("updatedbserver", $server, "var5", $mumbleport);
             foreach ($extras as $extra) {
                 sendCommand("extra", $server, $extra);
@@ -92,7 +94,7 @@ class UgccsetupPlugin extends Plugin {
 
     }
 
-    public function sendCommand($command, $server_id=NULL, o1=NULL, o2=NULL){
+    public function sendCommand($command, $server_id=NULL, $o1=NULL, $o2=NULL){
         $params = array(
                 "u" => $this->UgccsetupSettings->getSetting("ugcc_user"),
                 "p" => $this->UgccsetupSettings->getSetting("ugcc_token"),
@@ -100,8 +102,8 @@ class UgccsetupPlugin extends Plugin {
                 "c" => $command,
                 "o1" => $o1,
                 "o2" => $o2,
-        )
-        $ugcc = curl_init($this->UgccsetupSettings->getSetting("api_url");
+        );
+        $ugcc = curl_init($this->UgccsetupSettings->getSetting("api_url"));
         curl_setopt($ugcc, CURLOPT_POST, 1);
         curl_setopt($ugcc, CURLOPT_POSTFIELDS, http_build_query($params));
         curl_setopt($ugcc, CURLOPT_RETURNTRANSFER, true);

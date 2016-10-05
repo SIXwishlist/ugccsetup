@@ -1,6 +1,5 @@
 {
-    "services":
-    [
+    "services":[
             {
                 "id" : 2,
                 "game" : "tf2",
@@ -25,5 +24,20 @@
                 "game_slots" : 32,
                 "mumble_slots" : 100
             }
+    ],
+    "extras":[
+        {
+            "billing_id": 1,
+            "extra_ids": ["1", "2", "3"]
+        }
+    ],
+    "games":[
+        {
+            "id": 1,
+            "appid": 440,
+            "short": "tf2",
+            "long": "Team Fortress 2"
+        }
     ]
+
 }

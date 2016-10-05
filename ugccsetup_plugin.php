@@ -19,6 +19,7 @@ class UgccsetupPlugin extends Plugin {
 	}
 
 	private function handleCInvoice($event) {
+                Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings"));
                 Loader::loadModels($this, array("Invoices"));
                 Loader::loadModels($this, array("Clients"));
 
@@ -42,8 +43,9 @@ class UgccsetupPlugin extends Plugin {
                 $server = makeServer($invoice['service_id'], $username, $invoice["email"], $extras);
                 
 	}
-    //$extras is an array of extra ids to install
-	public function makeServer($service_id, $username, $email, $extras=NULL) {
+    // $extras is an array of blesta extra ids
+    public function makeServer($service_id, $username, $email, $extras=NULL) {
+            Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings");
             $server = getServerByUID($this->UgccsetupSettings->getSetting("free_server_owner_id"));
             if ($server == NULL){
                 warn(true, "No servers left to setup");
@@ -53,39 +55,68 @@ class UgccsetupPlugin extends Plugin {
                     $info = explode(",", sendCommand("newuser", NULL, $username));
                     $uid = $info[0];
             }
-            $services_str = file_get_contents("setup.json");
-            if ($services_str == false){
+            $setup_str = file_get_contents("setup.json");
+            if ($setup_str == false){
                 warn(true, "No services specified in setup.json");
             }
-            $services = json_decode($string, true)['services'];
+            $decoded = json_decode($setup_str, true)['services'];
+            $extra_ids = $decoded['extras'];
+            $services = $decoded['services'];
             $service = NULL;
             foreach($services as $s){
                     if ($s['id'] == $service_id){
                         $service = $s;
                     }
             }
+
             if ($service == NULL){
                 warn(true, "Invalid service ID " . $service_id . ". Make sure setup.json is correctly formatted and up to date");
             }
-            
+            /*
+            foreach(glob("server_*.txt") as $file) {
+                $ips = explode("\n", file_get_contents($file));
+                if (count($ips) > 1) {
+                    $ip = $ips[2];
+                    
+                }
+            }*/
+            if ($extras != NULL) {
+                $extra_install_ids = [];
+                foreach($extra_ids as $e) {
+                        if (in_array($e['billing_id'], $extras)) {
+                            foreach($e['extra_ids'] as $ex){
+                                array_push($extra_install_ids, $ex);
+                            }
+                        }
+                }
+            }
             
             // Do actual ugcc server setup
             // This should be the last thing we do
             sendCommand("updatedbserver", $server, "user", $uid);
-            //TODO set server game to service['game']
             sendCommand("updatedbserver", $server, "var1", $service['game_slots']);
             //TODO setup mumble server with service['mumble_slots']
             sendCommand("updatedbserver", $server, "var5", $mumbleport);
-            foreach ($extras as $extra) {
+            if ($extras != NULL){
+                    foreach ($extra_install_ids as $extra) {
                 sendCommand("extra", $server, $extra);
+                    }
             }
 
     }
     
     // Never returns if $fatal is true
-    public function warn($fatal, $warning_msg) {
+    // Always sends email if $force_email is true
+    public function warn($fatal, $warning_msg, $log=true) {
+        if ($log) {
+            $log_msg = $warning_msg;
+            if ($fatal)
+                    $log_msg = "FATAL: " . $warning_msg;
+            // TODO
+            file_put_contents("log.txt", $log_msg, FILE_APPEND);
+        }
         if ($fatal) {
-            warn(false, $warning_msg);
+            warn(false, $warning_msg, false);
             exit();
         } 
         else {
@@ -95,7 +126,8 @@ class UgccsetupPlugin extends Plugin {
     }
 
     public function sendCommand($command, $server_id=NULL, $o1=NULL, $o2=NULL){
-        $params = array(
+            Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings");
+            $params = array(
                 "u" => $this->UgccsetupSettings->getSetting("ugcc_user"),
                 "p" => $this->UgccsetupSettings->getSetting("ugcc_token"),
                 "i" => $server_id,
@@ -110,7 +142,7 @@ class UgccsetupPlugin extends Plugin {
         $response = curl_exec($ugcc);
         curl_close($ugcc);
         if (substr($response, 0, 2) != "OK") {
-            return warn(true, "Error connecting to UGCC:\n" . $response);
+            return warn(true, "Error connecting to UGCC: " . $response);
         }
         else {
             return substr($response, 5);
@@ -119,6 +151,7 @@ class UgccsetupPlugin extends Plugin {
 
     public function getServerByUID($uid) {
         //TODO cache server list
+        Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings");
         $servers = explode(",", str_replace("\n", ",", sendCommand("listservers")));
         $server_key = array_search($uid, $list);
         if ($server_key == false)
@@ -128,6 +161,7 @@ class UgccsetupPlugin extends Plugin {
 
     public function getUID($username) {
         //TODO cache user list
+        Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings");
         $users = explode(",", str_replace("\n", ",", sendCommand('listusers')));
         $user_key = array_search($uid, $list);
         if ($user_key == false)

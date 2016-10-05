@@ -50,6 +50,9 @@ class UgccsetupSettings extends AppModel {
                     "ugcc_user" => "Ugccsetup.ugcc_user",
                     "ugcc_token" => "Ugccsetup.ugcc_token",
                     "api_url" => "Ugccsetup.api_token",
+                    "notify_enable" => "Ugccsetup.notify_enable",
+                    "notify_verbose"
+                    "notify_addresses" => "Ugccsetup.notify_addresses"
             );
         }
 }

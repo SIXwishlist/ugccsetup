@@ -23,7 +23,23 @@ $this->Form->create()
                     $this->Form->fieldText("free_server_owner_id", $this->Html->ifSet($vars->free_server_owner_id), array("id" => "free_server_owner_id"));
                 ?>
               </li>
+
+            <li>
+                <?php
+                    $this->Form->label("UGCC API URL (should end with api.aspx)", "api_url");
+                    $this->Form->fieldTest("api_url", $this->Html->ifSet($vars->api_url), array("id" => "api_url"));
+            </li>
+            <li>
+                <?php
+                    $this->Form->label("UGCC Username", "ugcc_user");
+                    $this->Form->fieldTest("ugcc_user", $this->Html->ifSet($vars->ugcc_user), array("id" => "ugcc_user"));
+            </li>
             
+            <li>
+                <?php
+                    $this->Form->label("UGCC Password", "ugcc_token");
+                    $this->Form->fieldTest("ugcc_token", $this->Html->ifSet($vars->ugcc_token), array("id" => "ugcc_token"));
+            </li>
         </ul>
     </div>
     <div class="button_row"><a class="btn_right submit" href="#">Submit</a></div>

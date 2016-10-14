@@ -38,6 +38,16 @@
             "short": "tf2",
             "long": "Team Fortress 2"
         }
+    ],
+    "emails":[
+        {
+            "nonfatal": 1,
+            "address": "alex@accelerateservers.com"
+        },
+        {
+            "nonfatal": 0,
+            "address": "admin@accelerateservers.com"
+        }
     ]
 
 }

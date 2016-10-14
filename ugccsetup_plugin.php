@@ -1,8 +1,4 @@
-<?php
-class UgccsetupPlugin extends Plugin {
-    public function __construct() {
-        $this->loadConfig(dirname(__FILE__) . DS . "config.json");
-    }
+<?php class UgccsetupPlugin extends Plugin { public function __construct() { $this->loadConfig(dirname(__FILE__) . DS . "config.json"); }
     
     public function install($plugin_id) {
         Loader::loadModels($this, array("Ugccsetup.UgccsetupSettings"));
@@ -59,7 +55,7 @@ class UgccsetupPlugin extends Plugin {
             if ($setup_str == false){
                 warn(true, "No services specified in setup.json");
             }
-            $decoded = json_decode($setup_str, true)['services'];
+            $decoded = json_decode($setup_str, true);
             $extra_ids = $decoded['extras'];
             $services = $decoded['services'];
             $service = NULL;
@@ -106,23 +102,37 @@ class UgccsetupPlugin extends Plugin {
     }
     
     // Never returns if $fatal is true
-    // Always sends email if $force_email is true
+    // Logs to log.txt if $log is true (default)
     public function warn($fatal, $warning_msg, $log=true) {
         if ($log) {
             $log_msg = $warning_msg;
             if ($fatal)
                     $log_msg = "FATAL: " . $warning_msg;
             // TODO
-            file_put_contents("log.txt", $log_msg, FILE_APPEND);
+            file_put_contents("log.txt", "\n" . date('Y/m/d H:i:s') . $log_msg, FILE_APPEND);
         }
+        Loader::loadModels($this, array("Email");
+        $from = "no-reply@accelerateservers.com";
+        $from_name = "Accelerate Servers";
+        $body = array("text"=>"The following error occured when provisioning a server automatically: \n" . $warning_msg);
         if ($fatal) {
-            warn(false, $warning_msg, false);
-            exit();
-        } 
-        else {
-            //TODO send email warning
+                $subject = "Fatal error setting up server";
+                $body["text"] = $body["text"] . "\n This is a fatal error and the server has not been setup. Please manually provision it as soon as possible.";
+        } else {
+                $subject = "Non-fatal error setting up server";
+                $body["text"] = $body["text"] . "\n This server may need to have its configuration adjusted manually.";
         }
-
+        // TODO possible cache email list?
+        $setup_str = file_get_contents("setup.json");
+        if ($setup_str == false){
+            warn(true, "Invalid setup.json");
+        }
+        $emails = json_decode($setup_str, true)["emails"];
+        foreach($emails as $email) {
+            if ($fatal || $email["nonfatal"]) {
+                $this->Emails->sendCustom($from, $from_name, $email["address"], $subject, $body, NULL);
+            }
+        }
     }
 
     public function sendCommand($command, $server_id=NULL, $o1=NULL, $o2=NULL){
